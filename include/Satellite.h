@@ -3,13 +3,17 @@
 
 #include <string>
 
+#include "PowerSubsystem.h"
+#include "ThermalSubsystem.h"
+#include "NavigationSubsystem.h"
+
 class Satellite {
 private:
     std::string name;
-    double batteryLevel;
-    double temperature;
-    double altitude;
-    double velocity;
+
+    PowerSubsystem power;
+    ThermalSubsystem thermal;
+    NavigationSubsystem navigation;
 
 public:
     Satellite(const std::string& name);

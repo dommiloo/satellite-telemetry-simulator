@@ -7,8 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(
     satellite_simulator
+
     src/main.cpp
     src/Satellite.cpp
+    src/PowerSubsystem.cpp
+    src/ThermalSubsystem.cpp
+    src/NavigationSubsystem.cpp
 )
 
 target_include_directories(
