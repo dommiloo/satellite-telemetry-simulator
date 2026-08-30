@@ -1,4 +1,4 @@
-#include "satellite.h"
+#include "Satellite.h"
 
 #include <chrono>
 #include <thread>
