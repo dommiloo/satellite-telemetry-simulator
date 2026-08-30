@@ -19,5 +19,3 @@ A C++ simulation of satellite telemetry and ground-station communication.
 - Fault detection
 - Safe mode
 - Automated testing
-
-That gives you a nice d
