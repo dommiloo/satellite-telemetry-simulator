@@ -6,6 +6,7 @@
 #include "PowerSubsystem.h"
 #include "ThermalSubsystem.h"
 #include "NavigationSubsystem.h"
+#include "OrbitEnvironment.h"
 
 class Satellite {
 private:
@@ -14,6 +15,9 @@ private:
     PowerSubsystem power;
     ThermalSubsystem thermal;
     NavigationSubsystem navigation;
+
+    OrbitEnvironment environment;
+    int updateCount;
 
 public:
     Satellite(const std::string& name);

@@ -1,6 +1,8 @@
 #ifndef THERMALSUBSYSTEM_H
 #define THERMALSUBSYSTEM_H
 
+#include "OrbitEnvironment.h"
+
 class ThermalSubsystem {
 private:
     double temperature;
@@ -8,7 +10,7 @@ private:
 public:
     ThermalSubsystem();
 
-    void update();
+    void update(OrbitEnvironment environment);
     double getTemperature() const;
 };
 

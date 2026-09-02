@@ -1,6 +1,8 @@
 #ifndef POWERSUBSYSTEM_H
 #define POWERSUBSYSTEM_H
 
+#include "OrbitEnvironment.h"
+
 class PowerSubsystem {
 private:
     double batteryLevel;
@@ -8,7 +10,7 @@ private:
 public:
     PowerSubsystem();
 
-    void update();
+    void update(OrbitEnvironment environment);
     double getBatteryLevel() const;
 };
 
