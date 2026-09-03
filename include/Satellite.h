@@ -2,11 +2,13 @@
 #define SATELLITE_H
 
 #include <string>
+#include <cstdint>
 
 #include "PowerSubsystem.h"
 #include "ThermalSubsystem.h"
 #include "NavigationSubsystem.h"
 #include "OrbitEnvironment.h"
+#include "TelemetryPacket.h"
 
 class Satellite {
 private:
@@ -17,13 +19,20 @@ private:
     NavigationSubsystem navigation;
 
     OrbitEnvironment environment;
+
+    std::uint32_t satelliteId;
+    std::uint32_t sequenceNumber;
+
     int updateCount;
 
 public:
-    Satellite(const std::string& name);
+    Satellite(const std::string& name, std::uint32_t satelliteId);
 
     void update();
-    void printTelemetry() const;
+
+    TelemetryPacket generateTelemetry();
+
+    void printTelemetry(const TelemetryPacket& packet) const;
 };
 
 #endif

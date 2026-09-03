@@ -1,10 +1,16 @@
 #include "Satellite.h"
 
 #include <iostream>
+#include <chrono>
 
-Satellite::Satellite(const std::string& name)
+Satellite::Satellite(
+    const std::string& name,
+    std::uint32_t satelliteId
+)
     : name(name),
       environment(OrbitEnvironment::Sunlight),
+      satelliteId(satelliteId),
+      sequenceNumber(0),
       updateCount(0) {
 }
 
@@ -22,31 +28,71 @@ void Satellite::update() {
     navigation.update();
 }
 
-void Satellite::printTelemetry() const {
+TelemetryPacket Satellite::generateTelemetry() {
+    TelemetryPacket packet;
+
+    packet.satelliteId = satelliteId;
+
+    packet.sequenceNumber = sequenceNumber;
+    sequenceNumber++;
+
+    packet.timestamp =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count();
+
+    packet.batteryLevel = power.getBatteryLevel();
+    packet.temperature = thermal.getTemperature();
+    packet.altitude = navigation.getAltitude();
+    packet.velocity = navigation.getVelocity();
+
+    packet.inSunlight =
+        environment == OrbitEnvironment::Sunlight;
+
+    return packet;
+}
+
+
+
+void Satellite::printTelemetry(
+    const TelemetryPacket& packet
+) const {
     std::cout << "Satellite: " << name << '\n';
+
+    std::cout << "Satellite ID: "
+              << packet.satelliteId
+              << '\n';
+
+    std::cout << "Sequence: "
+              << packet.sequenceNumber
+              << '\n';
+
+    std::cout << "Timestamp: "
+              << packet.timestamp
+              << " ms\n";
 
     std::cout << "Environment: ";
 
-    if (environment == OrbitEnvironment::Sunlight) {
+    if (packet.inSunlight) {
         std::cout << "SUNLIGHT\n";
     } else {
         std::cout << "ECLIPSE\n";
     }
 
     std::cout << "Battery: "
-              << power.getBatteryLevel()
+              << packet.batteryLevel
               << "%\n";
 
     std::cout << "Temperature: "
-              << thermal.getTemperature()
+              << packet.temperature
               << " C\n";
 
     std::cout << "Altitude: "
-              << navigation.getAltitude()
+              << packet.altitude
               << " km\n";
 
     std::cout << "Velocity: "
-              << navigation.getVelocity()
+              << packet.velocity
               << " km/s\n";
 
     std::cout << "-----------------------------\n";

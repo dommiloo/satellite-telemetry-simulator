@@ -4,11 +4,15 @@
 #include <thread>
 
 int main() {
-    Satellite satellite("SAT-01");
+    Satellite satellite("SAT-01", 1);
 
     while (true) {
         satellite.update();
-        satellite.printTelemetry();
+
+        TelemetryPacket packet =
+            satellite.generateTelemetry();
+
+        satellite.printTelemetry(packet);
 
         std::this_thread::sleep_for(
             std::chrono::seconds(1)
