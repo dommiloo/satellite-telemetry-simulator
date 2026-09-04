@@ -13,6 +13,7 @@ add_executable(
     src/PowerSubsystem.cpp
     src/ThermalSubsystem.cpp
     src/NavigationSubsystem.cpp
+    src/TelemetrySerializer.cpp
 )
 
 target_include_directories(
