@@ -1,5 +1,6 @@
 #include "Satellite.h"
 #include "TelemetrySerializer.h"
+#include "UdpSender.h"
 
 #include <chrono>
 #include <cstdint>
@@ -10,26 +11,29 @@
 int main() {
     Satellite satellite("SAT-01", 1);
 
+    UdpSender sender(
+        "127.0.0.1",
+        5000
+    );
+
     while (true) {
         satellite.update();
 
-        TelemetryPacket original =
+        TelemetryPacket packet =
             satellite.generateTelemetry();
 
-       
         std::vector<std::uint8_t> bytes =
-            TelemetrySerializer::serialize(original);
+            TelemetrySerializer::serialize(packet);
 
-        TelemetryPacket reconstructed =
-            TelemetrySerializer::deserialize(bytes);
+        sender.send(bytes);
 
-        satellite.printTelemetry(reconstructed);
-
-        std::cout << "Serialized size: "
-                  << bytes.size()
-                  << " bytes\n";
-
-        std::cout << "=============================\n";
+        std::cout
+            << "Sent telemetry packet "
+            << packet.sequenceNumber
+            << " ("
+            << bytes.size()
+            << " bytes)"
+            << '\n';
 
         std::this_thread::sleep_for(
             std::chrono::seconds(1)
