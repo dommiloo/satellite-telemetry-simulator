@@ -5,7 +5,6 @@
 
 #include <cstdint>
 #include <iostream>
-#include <stdexcept>
 #include <vector>
 
 int main() {
@@ -17,9 +16,7 @@ int main() {
             &wsaData
         ) != 0
     ) {
-        std::cerr
-            << "Failed to initialize Winsock\n";
-
+        std::cerr << "Failed to initialize Winsock\n";
         return 1;
     }
 
@@ -31,22 +28,17 @@ int main() {
         );
 
     if (socketFd == INVALID_SOCKET) {
-        std::cerr
-            << "Failed to create UDP socket\n";
+        std::cerr << "Failed to create UDP socket\n";
 
         WSACleanup();
-
         return 1;
     }
 
     sockaddr_in serverAddress{};
 
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port =
-        htons(5000);
-
-    serverAddress.sin_addr.s_addr =
-        INADDR_ANY;
+    serverAddress.sin_port = htons(5000);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
 
     if (
         bind(
@@ -57,8 +49,7 @@ int main() {
             sizeof(serverAddress)
         ) == SOCKET_ERROR
     ) {
-        std::cerr
-            << "Failed to bind UDP socket\n";
+        std::cerr << "Failed to bind UDP socket\n";
 
         closesocket(socketFd);
         WSACleanup();
@@ -68,6 +59,9 @@ int main() {
 
     std::cout
         << "Ground station listening on port 5000...\n";
+
+    std::uint32_t lastSequence = 0;
+    bool firstPacket = true;
 
     while (true) {
         std::vector<std::uint8_t> buffer(1024);
@@ -106,6 +100,41 @@ int main() {
                 TelemetrySerializer::deserialize(
                     buffer
                 );
+
+            // Check for missing sequence numbers
+            if (!firstPacket) {
+                std::uint32_t expectedSequence =
+                    lastSequence + 1;
+
+                if (
+                    packet.sequenceNumber >
+                    expectedSequence
+                ) {
+                    std::uint32_t missingPackets =
+                        packet.sequenceNumber -
+                        expectedSequence;
+
+                    std::cout
+                        << "\n[WARNING] Missing "
+                        << missingPackets
+                        << " telemetry packet(s)\n";
+
+                    std::cout
+                        << "Expected sequence: "
+                        << expectedSequence
+                        << '\n';
+
+                    std::cout
+                        << "Received sequence: "
+                        << packet.sequenceNumber
+                        << '\n';
+                }
+            }
+
+            lastSequence =
+                packet.sequenceNumber;
+
+            firstPacket = false;
 
             std::cout
                 << "\n-----------------------------\n";
