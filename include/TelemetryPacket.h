@@ -14,6 +14,8 @@ struct TelemetryPacket {
     double velocity;
 
     bool inSunlight;
+
+    std::uint32_t checksum;
 };
 
 #endif

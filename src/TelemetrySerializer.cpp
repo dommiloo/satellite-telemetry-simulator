@@ -1,6 +1,7 @@
 #include "TelemetrySerializer.h"
 
 #include <bit>
+#include <cstddef>
 #include <stdexcept>
 
 namespace {
@@ -31,9 +32,14 @@ void writeDouble(
     double value
 ) {
     std::uint64_t bits =
-        std::bit_cast<std::uint64_t>(value);
+        std::bit_cast<std::uint64_t>(
+            value
+        );
 
-    writeUint64(buffer, bits);
+    writeUint64(
+        buffer,
+        bits
+    );
 }
 
 std::uint32_t readUint32(
@@ -83,9 +89,46 @@ double readDouble(
     std::size_t& offset
 ) {
     std::uint64_t bits =
-        readUint64(data, offset);
+        readUint64(
+            data,
+            offset
+        );
 
-    return std::bit_cast<double>(bits);
+    return std::bit_cast<double>(
+        bits
+    );
+}
+
+std::uint32_t calculateCrc32(
+    const std::vector<std::uint8_t>& data,
+    std::size_t length
+) {
+    std::uint32_t crc =
+        0xFFFFFFFF;
+
+    for (
+        std::size_t i = 0;
+        i < length;
+        i++
+    ) {
+        crc ^= data[i];
+
+        for (
+            int bit = 0;
+            bit < 8;
+            bit++
+        ) {
+            if (crc & 1) {
+                crc =
+                    (crc >> 1) ^
+                    0xEDB88320;
+            } else {
+                crc >>= 1;
+            }
+        }
+    }
+
+    return crc ^ 0xFFFFFFFF;
 }
 
 }
@@ -135,6 +178,17 @@ TelemetrySerializer::serialize(
         packet.inSunlight ? 1 : 0
     );
 
+    std::uint32_t checksum =
+        calculateCrc32(
+            buffer,
+            buffer.size()
+        );
+
+    writeUint32(
+        buffer,
+        checksum
+    );
+
     return buffer;
 }
 
@@ -142,39 +196,87 @@ TelemetryPacket
 TelemetrySerializer::deserialize(
     const std::vector<std::uint8_t>& data
 ) {
+    constexpr std::size_t PAYLOAD_SIZE =
+        49;
+
+    constexpr std::size_t PACKET_SIZE =
+        53;
+
+    if (data.size() != PACKET_SIZE) {
+        throw std::runtime_error(
+            "Invalid telemetry packet size"
+        );
+    }
+
     std::size_t offset = 0;
 
     TelemetryPacket packet;
 
     packet.satelliteId =
-        readUint32(data, offset);
+        readUint32(
+            data,
+            offset
+        );
 
     packet.sequenceNumber =
-        readUint32(data, offset);
+        readUint32(
+            data,
+            offset
+        );
 
     packet.timestamp =
-        readUint64(data, offset);
+        readUint64(
+            data,
+            offset
+        );
 
     packet.batteryLevel =
-        readDouble(data, offset);
+        readDouble(
+            data,
+            offset
+        );
 
     packet.temperature =
-        readDouble(data, offset);
+        readDouble(
+            data,
+            offset
+        );
 
     packet.altitude =
-        readDouble(data, offset);
+        readDouble(
+            data,
+            offset
+        );
 
     packet.velocity =
-        readDouble(data, offset);
-
-    if (offset >= data.size()) {
-        throw std::runtime_error(
-            "Invalid telemetry packet"
+        readDouble(
+            data,
+            offset
         );
-    }
 
     packet.inSunlight =
-        data[offset] != 0;
+        data[offset++] != 0;
+
+    packet.checksum =
+        readUint32(
+            data,
+            offset
+        );
+
+    std::uint32_t calculatedChecksum =
+        calculateCrc32(
+            data,
+            PAYLOAD_SIZE
+        );
+
+    if (
+        packet.checksum !=
+        calculatedChecksum
+    ) {
+        throw std::runtime_error(
+            "CRC validation failed"
+        );
+    }
 
     return packet;
 }

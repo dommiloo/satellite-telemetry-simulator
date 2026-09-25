@@ -155,6 +155,9 @@ int main() {
                 << " ms\n";
 
             std::cout
+                << "CRC Status: VALID\n";
+
+            std::cout
                 << "Environment: "
                 << (
                     packet.inSunlight
@@ -187,7 +190,7 @@ int main() {
             const std::exception& error
         ) {
             std::cerr
-                << "Invalid telemetry packet: "
+                << "\n[ERROR] Telemetry packet rejected: "
                 << error.what()
                 << '\n';
         }
