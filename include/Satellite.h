@@ -1,14 +1,16 @@
 #ifndef SATELLITE_H
 #define SATELLITE_H
 
-#include <string>
 #include <cstdint>
+#include <string>
 
-#include "PowerSubsystem.h"
-#include "ThermalSubsystem.h"
+#include "FaultManager.h"
 #include "NavigationSubsystem.h"
 #include "OrbitEnvironment.h"
+#include "PowerSubsystem.h"
+#include "SatelliteMode.h"
 #include "TelemetryPacket.h"
+#include "ThermalSubsystem.h"
 
 class Satellite {
 private:
@@ -18,7 +20,10 @@ private:
     ThermalSubsystem thermal;
     NavigationSubsystem navigation;
 
+    FaultManager faultManager;
+
     OrbitEnvironment environment;
+    SatelliteMode mode;
 
     std::uint32_t satelliteId;
     std::uint32_t sequenceNumber;
@@ -26,13 +31,18 @@ private:
     int updateCount;
 
 public:
-    Satellite(const std::string& name, std::uint32_t satelliteId);
+    Satellite(
+        const std::string& name,
+        std::uint32_t satelliteId
+    );
 
     void update();
 
     TelemetryPacket generateTelemetry();
 
-    void printTelemetry(const TelemetryPacket& packet) const;
+    void printTelemetry(
+        const TelemetryPacket& packet
+    ) const;
 };
 
 #endif

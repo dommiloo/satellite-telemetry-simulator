@@ -1,6 +1,8 @@
 #ifndef TELEMETRYPACKET_H
 #define TELEMETRYPACKET_H
 
+#include "SatelliteMode.h"
+
 #include <cstdint>
 
 struct TelemetryPacket {
@@ -14,6 +16,10 @@ struct TelemetryPacket {
     double velocity;
 
     bool inSunlight;
+
+    SatelliteMode mode;
+
+    std::uint32_t faultFlags;
 
     std::uint32_t checksum;
 };

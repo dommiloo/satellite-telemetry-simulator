@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(
     satellite_simulator
+
     src/main.cpp
     src/Satellite.cpp
     src/PowerSubsystem.cpp
@@ -14,6 +15,7 @@ add_executable(
     src/NavigationSubsystem.cpp
     src/TelemetrySerializer.cpp
     src/UdpSender.cpp
+    src/FaultManager.cpp
 )
 
 target_include_directories(
@@ -28,6 +30,7 @@ target_link_libraries(
 
 add_executable(
     ground_station
+
     ground_station/main.cpp
     src/TelemetrySerializer.cpp
 )

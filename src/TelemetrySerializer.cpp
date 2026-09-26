@@ -122,7 +122,8 @@ std::uint32_t calculateCrc32(
                 crc =
                     (crc >> 1) ^
                     0xEDB88320;
-            } else {
+            }
+            else {
                 crc >>= 1;
             }
         }
@@ -178,6 +179,17 @@ TelemetrySerializer::serialize(
         packet.inSunlight ? 1 : 0
     );
 
+    buffer.push_back(
+        static_cast<std::uint8_t>(
+            packet.mode
+        )
+    );
+
+    writeUint32(
+        buffer,
+        packet.faultFlags
+    );
+
     std::uint32_t checksum =
         calculateCrc32(
             buffer,
@@ -197,10 +209,10 @@ TelemetrySerializer::deserialize(
     const std::vector<std::uint8_t>& data
 ) {
     constexpr std::size_t PAYLOAD_SIZE =
-        49;
+        54;
 
     constexpr std::size_t PACKET_SIZE =
-        53;
+        58;
 
     if (data.size() != PACKET_SIZE) {
         throw std::runtime_error(
@@ -256,6 +268,17 @@ TelemetrySerializer::deserialize(
 
     packet.inSunlight =
         data[offset++] != 0;
+
+    packet.mode =
+        static_cast<SatelliteMode>(
+            data[offset++]
+        );
+
+    packet.faultFlags =
+        readUint32(
+            data,
+            offset
+        );
 
     packet.checksum =
         readUint32(

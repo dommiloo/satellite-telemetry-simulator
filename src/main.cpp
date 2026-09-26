@@ -9,7 +9,10 @@
 #include <vector>
 
 int main() {
-    Satellite satellite("SAT-01", 1);
+    Satellite satellite(
+        "SAT-01",
+        1
+    );
 
     UdpSender sender(
         "127.0.0.1",
@@ -23,7 +26,9 @@ int main() {
             satellite.generateTelemetry();
 
         std::vector<std::uint8_t> bytes =
-            TelemetrySerializer::serialize(packet);
+            TelemetrySerializer::serialize(
+                packet
+            );
 
         sender.send(bytes);
 

@@ -12,7 +12,9 @@ public:
     serialize(const TelemetryPacket& packet);
 
     static TelemetryPacket
-    deserialize(const std::vector<std::uint8_t>& data);
+    deserialize(
+        const std::vector<std::uint8_t>& data
+    );
 };
 
 #endif

@@ -1,4 +1,6 @@
 #include "TelemetrySerializer.h"
+#include "FaultManager.h"
+#include "SatelliteMode.h"
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -16,7 +18,9 @@ int main() {
             &wsaData
         ) != 0
     ) {
-        std::cerr << "Failed to initialize Winsock\n";
+        std::cerr
+            << "Failed to initialize Winsock\n";
+
         return 1;
     }
 
@@ -28,17 +32,24 @@ int main() {
         );
 
     if (socketFd == INVALID_SOCKET) {
-        std::cerr << "Failed to create UDP socket\n";
+        std::cerr
+            << "Failed to create UDP socket\n";
 
         WSACleanup();
+
         return 1;
     }
 
     sockaddr_in serverAddress{};
 
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(5000);
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
+    serverAddress.sin_family =
+        AF_INET;
+
+    serverAddress.sin_port =
+        htons(5000);
+
+    serverAddress.sin_addr.s_addr =
+        INADDR_ANY;
 
     if (
         bind(
@@ -49,7 +60,8 @@ int main() {
             sizeof(serverAddress)
         ) == SOCKET_ERROR
     ) {
-        std::cerr << "Failed to bind UDP socket\n";
+        std::cerr
+            << "Failed to bind UDP socket\n";
 
         closesocket(socketFd);
         WSACleanup();
@@ -67,6 +79,7 @@ int main() {
         std::vector<std::uint8_t> buffer(1024);
 
         sockaddr_in senderAddress{};
+
         int senderAddressSize =
             sizeof(senderAddress);
 
@@ -101,7 +114,7 @@ int main() {
                     buffer
                 );
 
-            // Check for missing sequence numbers
+            // Detect missing packets
             if (!firstPacket) {
                 std::uint32_t expectedSequence =
                     lastSequence + 1;
@@ -156,6 +169,61 @@ int main() {
 
             std::cout
                 << "CRC Status: VALID\n";
+
+            std::cout
+                << "Mode: ";
+
+            switch (packet.mode) {
+                case SatelliteMode::NOMINAL:
+                    std::cout
+                        << "NOMINAL\n";
+                    break;
+
+                case SatelliteMode::SAFE_MODE:
+                    std::cout
+                        << "SAFE_MODE\n";
+                    break;
+
+                case SatelliteMode::RECOVERY:
+                    std::cout
+                        << "RECOVERY\n";
+                    break;
+
+                default:
+                    std::cout
+                        << "UNKNOWN\n";
+                    break;
+            }
+
+            std::cout
+                << "Faults: ";
+
+            if (
+                packet.faultFlags ==
+                NO_FAULT
+            ) {
+                std::cout
+                    << "NONE\n";
+            }
+            else {
+                if (
+                    packet.faultFlags &
+                    LOW_BATTERY
+                ) {
+                    std::cout
+                        << "LOW_BATTERY ";
+                }
+
+                if (
+                    packet.faultFlags &
+                    OVER_TEMPERATURE
+                ) {
+                    std::cout
+                        << "OVER_TEMPERATURE ";
+                }
+
+                std::cout << '\n';
+            }
 
             std::cout
                 << "Environment: "
