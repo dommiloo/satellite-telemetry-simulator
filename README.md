@@ -23,12 +23,12 @@ The simulator models several satellite subsystems, packages their state into a c
 - Ground-station telemetry display
 - Packet-loss detection using sequence numbers
 - CRC32 telemetry integrity validation
+- Fault injection
 
 ### Planned
 
 - Persistent UDP socket management
 - Packet corruption simulation
-- Fault injection
 - Satellite operating modes
 - SAFE_MODE transitions
 - Command transmission from ground station to satellite
