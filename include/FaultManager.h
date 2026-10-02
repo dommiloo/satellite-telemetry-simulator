@@ -13,7 +13,8 @@ enum FaultFlags : std::uint32_t {
 
 class FaultManager {
 private:
-    std::uint32_t activeFaults;
+    std::uint32_t detectedFaults;
+    std::uint32_t injectedFaults;
 
 public:
     FaultManager();
@@ -22,6 +23,12 @@ public:
         double batteryLevel,
         double temperature
     );
+
+    void injectFault(
+        std::uint32_t fault
+    );
+
+    void clearInjectedFaults();
 
     std::uint32_t getActiveFaults() const;
 

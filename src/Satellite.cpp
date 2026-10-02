@@ -15,6 +15,18 @@ Satellite::Satellite(
       updateCount(0) {
 }
 
+void Satellite::injectFault(
+    std::uint32_t fault
+) {
+    faultManager.injectFault(fault);
+}
+
+void Satellite::clearInjectedFaults() {
+    faultManager.clearInjectedFaults();
+}
+
+
+
 void Satellite::update() {
     updateCount++;
 

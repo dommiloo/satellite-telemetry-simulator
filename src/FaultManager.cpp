@@ -1,7 +1,8 @@
 #include "FaultManager.h"
 
 FaultManager::FaultManager()
-    : activeFaults(NO_FAULT) {
+    : detectedFaults(NO_FAULT),
+      injectedFaults(NO_FAULT) {
 }
 
 void FaultManager::update(
@@ -11,30 +12,40 @@ void FaultManager::update(
     // LOW BATTERY
 
     if (batteryLevel < 15.0) {
-        activeFaults |= LOW_BATTERY;
+        detectedFaults |= LOW_BATTERY;
     }
     else if (batteryLevel > 25.0) {
-        activeFaults &= ~LOW_BATTERY;
+        detectedFaults &= ~LOW_BATTERY;
     }
 
     // OVER TEMPERATURE
 
     if (temperature > 70.0) {
-        activeFaults |= OVER_TEMPERATURE;
+        detectedFaults |= OVER_TEMPERATURE;
     }
     else if (temperature < 60.0) {
-        activeFaults &= ~OVER_TEMPERATURE;
+        detectedFaults &= ~OVER_TEMPERATURE;
     }
 }
 
+void FaultManager::injectFault(
+    std::uint32_t fault
+) {
+    injectedFaults |= fault;
+}
+
+void FaultManager::clearInjectedFaults() {
+    injectedFaults = NO_FAULT;
+}
+
 std::uint32_t FaultManager::getActiveFaults() const {
-    return activeFaults;
+    return detectedFaults | injectedFaults;
 }
 
 SatelliteMode FaultManager::determineMode(
     SatelliteMode currentMode
 ) const {
-    if (activeFaults != NO_FAULT) {
+    if (getActiveFaults() != NO_FAULT) {
         return SatelliteMode::SAFE_MODE;
     }
 

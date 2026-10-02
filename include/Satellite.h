@@ -38,6 +38,12 @@ public:
 
     void update();
 
+    void injectFault(
+        std::uint32_t fault
+    );
+
+    void clearInjectedFaults();
+
     TelemetryPacket generateTelemetry();
 
     void printTelemetry(
