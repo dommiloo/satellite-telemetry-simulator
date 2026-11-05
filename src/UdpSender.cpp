@@ -1,31 +1,30 @@
 #include "UdpSender.h"
 
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
 #include <stdexcept>
 
 UdpSender::UdpSender(
     const std::string& ip,
     std::uint16_t port
-)
-    : destinationIp(ip),
-      destinationPort(port) {
-}
-
-void UdpSender::send(
-    const std::vector<std::uint8_t>& data
 ) {
     WSADATA wsaData;
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    if (
+        WSAStartup(
+            MAKEWORD(2, 2),
+            &wsaData
+        ) != 0
+    ) {
         throw std::runtime_error(
             "Failed to initialize Winsock"
         );
     }
 
-    SOCKET socketFd =
-        socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    socketFd =
+        socket(
+            AF_INET,
+            SOCK_DGRAM,
+            IPPROTO_UDP
+        );
 
     if (socketFd == INVALID_SOCKET) {
         WSACleanup();
@@ -35,16 +34,18 @@ void UdpSender::send(
         );
     }
 
-    sockaddr_in destination{};
+    destination = {};
 
-    destination.sin_family = AF_INET;
+    destination.sin_family =
+        AF_INET;
+
     destination.sin_port =
-        htons(destinationPort);
+        htons(port);
 
     if (
         inet_pton(
             AF_INET,
-            destinationIp.c_str(),
+            ip.c_str(),
             &destination.sin_addr
         ) != 1
     ) {
@@ -52,17 +53,29 @@ void UdpSender::send(
         WSACleanup();
 
         throw std::runtime_error(
-            "Invalid destination IP"
+            "Invalid destination IP address"
         );
     }
+}
 
+UdpSender::~UdpSender() {
+    closesocket(socketFd);
+
+    WSACleanup();
+}
+
+void UdpSender::send(
+    const std::vector<std::uint8_t>& data
+) {
     int result =
         sendto(
             socketFd,
             reinterpret_cast<const char*>(
                 data.data()
             ),
-            static_cast<int>(data.size()),
+            static_cast<int>(
+                data.size()
+            ),
             0,
             reinterpret_cast<sockaddr*>(
                 &destination
@@ -71,14 +84,8 @@ void UdpSender::send(
         );
 
     if (result == SOCKET_ERROR) {
-        closesocket(socketFd);
-        WSACleanup();
-
         throw std::runtime_error(
             "Failed to send UDP packet"
         );
     }
-
-    closesocket(socketFd);
-    WSACleanup();
 }

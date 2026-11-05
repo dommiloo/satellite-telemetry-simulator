@@ -190,6 +190,10 @@ TelemetrySerializer::serialize(
         packet.faultFlags
     );
 
+    buffer.push_back(
+        packet.payloadEnabled ? 1 : 0
+    );
+
     std::uint32_t checksum =
         calculateCrc32(
             buffer,
@@ -209,10 +213,10 @@ TelemetrySerializer::deserialize(
     const std::vector<std::uint8_t>& data
 ) {
     constexpr std::size_t PAYLOAD_SIZE =
-        54;
+        55;
 
     constexpr std::size_t PACKET_SIZE =
-        58;
+        59;
 
     if (data.size() != PACKET_SIZE) {
         throw std::runtime_error(
@@ -222,7 +226,7 @@ TelemetrySerializer::deserialize(
 
     std::size_t offset = 0;
 
-    TelemetryPacket packet;
+    TelemetryPacket packet{};
 
     packet.satelliteId =
         readUint32(
@@ -279,6 +283,9 @@ TelemetrySerializer::deserialize(
             data,
             offset
         );
+
+    packet.payloadEnabled =
+        data[offset++] != 0;
 
     packet.checksum =
         readUint32(

@@ -25,6 +25,8 @@ private:
     OrbitEnvironment environment;
     SatelliteMode mode;
 
+    bool payloadEnabled;
+
     std::uint32_t satelliteId;
     std::uint32_t sequenceNumber;
 

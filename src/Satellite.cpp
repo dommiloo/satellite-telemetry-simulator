@@ -10,22 +10,11 @@ Satellite::Satellite(
     : name(name),
       environment(OrbitEnvironment::Sunlight),
       mode(SatelliteMode::NOMINAL),
+      payloadEnabled(true),
       satelliteId(satelliteId),
       sequenceNumber(0),
       updateCount(0) {
 }
-
-void Satellite::injectFault(
-    std::uint32_t fault
-) {
-    faultManager.injectFault(fault);
-}
-
-void Satellite::clearInjectedFaults() {
-    faultManager.clearInjectedFaults();
-}
-
-
 
 void Satellite::update() {
     updateCount++;
@@ -39,7 +28,6 @@ void Satellite::update() {
             OrbitEnvironment::Eclipse;
     }
 
-    power.update(environment);
     thermal.update(environment);
     navigation.update();
 
@@ -49,11 +37,33 @@ void Satellite::update() {
     );
 
     mode =
-        faultManager.determineMode(mode);
+        faultManager.determineMode(
+            mode
+        );
+
+    payloadEnabled =
+        (mode == SatelliteMode::NOMINAL);
+
+    power.update(
+        environment,
+        mode
+    );
+}
+
+void Satellite::injectFault(
+    std::uint32_t fault
+) {
+    faultManager.injectFault(
+        fault
+    );
+}
+
+void Satellite::clearInjectedFaults() {
+    faultManager.clearInjectedFaults();
 }
 
 TelemetryPacket Satellite::generateTelemetry() {
-    TelemetryPacket packet;
+    TelemetryPacket packet{};
 
     packet.satelliteId =
         satelliteId;
@@ -90,6 +100,9 @@ TelemetryPacket Satellite::generateTelemetry() {
 
     packet.faultFlags =
         faultManager.getActiveFaults();
+
+    packet.payloadEnabled =
+        payloadEnabled;
 
     packet.checksum = 0;
 
@@ -147,6 +160,15 @@ void Satellite::printTelemetry(
         << "Velocity: "
         << packet.velocity
         << " km/s\n";
+
+    std::cout
+        << "Payload: "
+        << (
+            packet.payloadEnabled
+                ? "ENABLED"
+                : "DISABLED"
+        )
+        << '\n';
 
     std::cout
         << "-----------------------------\n";

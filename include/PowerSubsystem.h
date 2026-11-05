@@ -2,6 +2,7 @@
 #define POWERSUBSYSTEM_H
 
 #include "OrbitEnvironment.h"
+#include "SatelliteMode.h"
 
 class PowerSubsystem {
 private:
@@ -10,7 +11,11 @@ private:
 public:
     PowerSubsystem();
 
-    void update(OrbitEnvironment environment);
+    void update(
+        OrbitEnvironment environment,
+        SatelliteMode mode
+    );
+
     double getBatteryLevel() const;
 };
 

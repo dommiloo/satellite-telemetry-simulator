@@ -114,7 +114,6 @@ int main() {
                     buffer
                 );
 
-            // Detect missing packets
             if (!firstPacket) {
                 std::uint32_t expectedSequence =
                     lastSequence + 1;
@@ -224,6 +223,15 @@ int main() {
 
                 std::cout << '\n';
             }
+
+            std::cout
+                << "Payload: "
+                << (
+                    packet.payloadEnabled
+                        ? "ENABLED"
+                        : "DISABLED"
+                )
+                << '\n';
 
             std::cout
                 << "Environment: "

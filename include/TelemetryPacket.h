@@ -21,6 +21,8 @@ struct TelemetryPacket {
 
     std::uint32_t faultFlags;
 
+    bool payloadEnabled;
+
     std::uint32_t checksum;
 };
 
