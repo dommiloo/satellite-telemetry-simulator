@@ -563,7 +563,11 @@ Current functionality includes end-to-end telemetry generation and UDP transmiss
 
 Remaining engineering work is focused on validation and repository polish rather than additional simulator functionality.
 
-## Future Work
+## DEMO IMAGE
+
+![Satellite Telemetry Simulator Demo](image.png)
+
+## Potential Future Work
 
 Potential future extensions include:
 
